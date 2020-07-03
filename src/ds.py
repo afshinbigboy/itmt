@@ -48,6 +48,7 @@ class McmcTree():
         self.last_E_hash = None
         self.last_E = None
 
+        self.gt_D = None
         self.gt_E = None
         self.gt_T = None
 
@@ -60,10 +61,11 @@ class McmcTree():
         _.print_info('\nNew mcmc tree named:', name)
 
 
-    def set_ground_truth(self, E, T=None):
-        self.gt_E = E
-        if T:
-            self.gt_T = T
+    def set_ground_truth(self, gt_D, gt_E, gt_T=None):
+        self.gt_D = gt_D
+        self.gt_E = gt_E
+        if gt_T:
+            self.gt_T = gt_T
         return
 
 
@@ -129,19 +131,82 @@ class McmcTree():
         D = self.__get_D()
         A = self.__get_A()
         E = self.__get_E()
+        best_T = self.get_best_tree()
+        gt_D = self.gt_D
+        gt_E = self.gt_E
+        gt_T = self.gt_T
+        
         self.__set_plt()
-        plt.figure(figsize=(20, 20))
-        plt.subplot(211)
-        self.__plot_charts()
-        plt.subplot(245)
-        self.__plot_D(D, 'D')
-        plt.subplot(246)
-        self.__plot_E(E, 'E')
-        plt.subplot(247)
-        self.__plot_DmE(D-E, 'D-E')
-        plt.subplot(248)
-        self.__plot_A(A, 'A')
-        plt.title('Sharing x per column, y per row')
+        if gt_D is not None and gt_E is not None:
+            
+            plt.figure(figsize=(30, 50))
+
+            plt.subplot2grid((8, 2), (0, 0), rowspan=3)
+            pdot = nx.drawing.nx_pydot.to_pydot(best_T)
+            pdot.write_png('example.png')
+            img = mpimg.imread('example.png')
+            # plt.figure(figsize=(30,40))
+            plt.imshow(img)
+            plt.title('best tree with error:{}'.format(self.get_best_error()))
+            plt.axis('off')
+
+            plt.subplot2grid((8, 2), (0, 1), rowspan=3)
+            pdot = nx.drawing.nx_pydot.to_pydot(gt_T)
+            pdot.write_png('example.png')
+            img = mpimg.imread('example.png')
+            # plt.figure(figsize=(40,40))
+            plt.imshow(img)
+            plt.title('truth tree')
+            plt.axis('off')
+
+
+            plt.subplot2grid((8, 3), (3, 0))
+            self.__plot_D(D, 'D')
+
+            plt.subplot2grid((8, 3), (3, 1))
+            self.__plot_D(gt_D, 'Ground Truth D (GT_D)')
+
+            plt.subplot2grid((8, 3), (3, 2))
+            self.__plot_DmE(D - D, 'D - D')
+
+
+            plt.subplot2grid((8, 3), (4, 0))
+            self.__plot_E(E, 'E')
+
+            plt.subplot2grid((8, 3), (4, 1))
+            self.__plot_E(gt_E, 'Ground Truth E (GT_E)')
+
+            plt.subplot2grid((8, 3), (4, 2))
+            self.__plot_DmE(E - gt_E, 'E - GT_E')
+
+
+            plt.subplot2grid((8, 3), (5, 0))
+            self.__plot_DmE(D-E, 'D - E')
+
+            plt.subplot2grid((8, 3), (5, 1))
+            self.__plot_DmE(D-gt_E, 'GT_D - GT_E')
+
+            plt.subplot2grid((8, 3), (5, 2))
+            self.__plot_DmE(D - gt_E, 'D - GT_E')
+
+
+            plt.subplot2grid((8, 3), (6, 0), colspan=3)
+            self.__plot_charts()
+
+        else:
+            plt.figure(figsize=(20, 20))
+            plt.subplot(211)
+            self.__plot_charts()
+            plt.subplot(245)
+            self.__plot_D(D, 'D')
+            plt.subplot(246)
+            self.__plot_E(E, 'E')
+            plt.subplot(247)
+            self.__plot_DmE(D-E, 'D-E')
+            plt.subplot(248)
+            self.__plot_A(A, 'A')
+            plt.title('Sharing x per column, y per row')
+
         plt.savefig('benchmark')
         plt.close()
         
@@ -323,7 +388,7 @@ class McmcTree():
             self.__T.add_edge(p, n)
         self.__initialize_params()
        
-
+    
     
     def plot_probs(self):
         plt.figure(figsize=(30,10))
@@ -398,7 +463,7 @@ class McmcTree():
             return D
         else:
             genes = self.__best_T.nodes(data=True)
-            D = np.zeros([self.num_genes, self.num_cells])
+            D = np.zeros([self.num_genes, self.num_cells], dtype=np.int)
             for i, g in enumerate(genes):
                 D[i, :] = np.array(g[1]['data'])
             return D
@@ -472,6 +537,9 @@ class McmcTree():
     base_step = 8
     face_step = 8
     def next(self,):
+        if not self.__best_errors[-1]:
+            exit()
+            
         self.step += 1
 
         if self.step % (self.base_step+self.face_step) < self.base_step:
