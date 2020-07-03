@@ -135,3 +135,4 @@ output*
 **/.DS_Store
 dataset*
 .vscode
+src/*.png
