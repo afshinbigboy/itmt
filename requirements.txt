@@ -1,0 +1,10 @@
+# pylint
+
+numpy
+scipy
+matplotlib
+networkx
+
+pygraphviz
+pydot
+pyyaml
