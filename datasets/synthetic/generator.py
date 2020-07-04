@@ -158,8 +158,8 @@ class TreeGenerator():
         ## ~~~~~~~~~~~~~~~~~~~~~ Tree to E ~~~~~~~~~~~~~~~~~~~~~~~~
         ## ========================================================
         E = np.zeros([self.M, self.N])
-        root = [n for n,d in T.in_degree() if d==0][0]
-        E[root, :] = 1
+        root = [n for n,d in raw_T.in_degree() if d==0][0]
+        E[int(root), :] = 1
         for n in range(self.N):
             path = list(nx.all_simple_paths(T, root, 'cell %d'%n))[0]
             for g in path[:-1]:

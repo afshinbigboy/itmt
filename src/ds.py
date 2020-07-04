@@ -349,8 +349,8 @@ class McmcTree():
             ',\t'.join([
                 'step:{:3d}'.format(self.step),
                 'mode:{}'.format(method),
-                'new_error:{}'.format(new_error),
-                'last_error:{}'.format(self.__errors[-1]),
+                'new_error:{:.2f}'.format(new_error),
+                'last_error:{:.2f}'.format(self.__errors[-1]),
                 'acc_prob:{:0.3f}'.format(acc_prob),
             ])
         )
@@ -530,9 +530,20 @@ class McmcTree():
         E = self.__get_E(T=T)
 
         DmE = D-E
+        D_and_E = D*E
 
+        ze_cnt = np.ones(self.num_cells)*self.num_genes - np.count_nonzero(DmE, 0)
+        tp_cnt = np.count_nonzero(D_and_E-1, 0)
+        tn_cnt = ze_cnt - tp_cnt
+        fp_cnt = np.count_nonzero(DmE-1, 0) - ze_cnt
+        fn_cnt = np.count_nonzero(DmE+1, 0) - ze_cnt
+
+        prob = ( (1-self.beta)*tp_cnt + (1-self.alpha)*tn_cnt
+                   +self.beta *fn_cnt +    self.alpha *fp_cnt )
+
+        error = np.sum(self.beta*fn_cnt + self.alpha*fp_cnt)
         # error = np.abs(np.linalg.norm(E) - np.linalg.norm(D))
-        error = np.sum(np.abs( (DmE**1)[:] ) )
+        # error = np.sum(np.abs( (DmE**1)[:] ) )
 
         # _.print_info('Error:', error)
         return error

@@ -33,8 +33,8 @@ M = 20
 N = 30
 ZETA = 1
 Gamma = 0.15
-alpha = 0.00
-beta = 0.00
+alpha = 0.1
+beta = 0.1
 MR = 0.00
 
 tg = TreeGenerator(
@@ -73,7 +73,8 @@ for m in range(G_num):
 ### Run
 dl = list(d for d in D)
 root = [n for n,d in gt_T.in_degree() if d==0][0]
-T = Tree(gensNames, data_list=dl, root=str(root))
+print('ROOT:', root)
+T = Tree(gensNames, data_list=dl, root=str(root), alpha=alpha, beta=beta)
 T.set_ground_truth(gt_D, gt_E, gt_T=gt_T)
 
 T.randomize()
