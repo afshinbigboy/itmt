@@ -133,7 +133,6 @@ dmypy.json
 output*
 .DS_Store
 **/.DS_Store
-dataset*
 .vscode
 src/*.png
 **/.png
