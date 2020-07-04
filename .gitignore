@@ -135,9 +135,9 @@ output*
 **/.DS_Store
 .vscode
 src/*.png
-dataset/synthetic/*.png
-dataset/real/*.png
+datasets/synthetic/*.png
+datasets/real/*.png
 
-dataset/synthetic/*.csv
-dataset/synthetic/*.gpickle
+datasets/synthetic/*.csv
+datasets/synthetic/*.gpickle
 
