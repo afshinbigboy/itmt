@@ -19,8 +19,10 @@ import matplotlib.patches as mpatches
 
 class McmcTree():
     def __set_plt(self):
-        font = {'weight' : 'normal',
-                'size'   : 8}
+        font = {
+            'weight' : 'normal',
+            'size'   : 8
+        }
         mpl.rc('font', **font)
         
 
@@ -538,8 +540,8 @@ class McmcTree():
     face_step = 8
     def next(self,):
         if not self.__best_errors[-1]:
-            exit()
-            
+            return
+
         self.step += 1
 
         if self.step % (self.base_step+self.face_step) < self.base_step:
