@@ -140,4 +140,4 @@ dataset/real/*.png
 
 dataset/synthetic/*.csv
 dataset/synthetic/*.gpickle
-dataset/real/*.csv
+
