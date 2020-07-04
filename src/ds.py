@@ -321,7 +321,10 @@ class McmcTree():
     def __finilizing_step(self, new_T, method):
         # _.print_warn(hash(new_T))
         new_error = self.__calc_tree_error(new_T)
-        acc_prob = min(1, (self.__errors[-1]/new_error))
+        if new_error > 0:
+            acc_prob = min(1, (self.__errors[-1]/new_error))
+        else:
+            acc_prob = 1
 
         if method == 'swap_nodes':
             if acc_prob<1: acc_prob = 0
@@ -540,7 +543,7 @@ class McmcTree():
     face_step = 8
     def next(self,):
         if not self.__best_errors[-1]:
-            return
+            return True
 
         self.step += 1
 
@@ -553,7 +556,8 @@ class McmcTree():
 
         else:
             self.__swap_nodes()
-            return
+        
+        return False
             
 
 
