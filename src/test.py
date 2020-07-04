@@ -47,7 +47,7 @@ tg = TreeGenerator(
     MR = MR,
 )
 (gt_E, gt_D, D, gt_T) = tg.generate()
-gensNames = list( str(i) for i in list(gt_T.nodes()) )
+gensNames = list( str(i) for i in range(M) )
 print(gensNames)
 
 
@@ -79,8 +79,9 @@ T.set_ground_truth(gt_D, gt_E, gt_T=gt_T)
 T.randomize()
 # T.plot('T0')
 
-for i in range(5000):
-    T.next()
+for i in range(3000):
+    if T.next():
+        break
 
 
 T.plot_all_results()
