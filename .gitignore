@@ -136,3 +136,6 @@ output*
 dataset*
 .vscode
 src/*.png
+**/.png
+**/.csv
+**/.gpickle
