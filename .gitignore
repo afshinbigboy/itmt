@@ -141,3 +141,5 @@ datasets/real/*.png
 datasets/synthetic/*.csv
 datasets/synthetic/*.gpickle
 
+src/*.mat
+src/*.txt
