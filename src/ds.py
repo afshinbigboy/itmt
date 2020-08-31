@@ -140,7 +140,7 @@ class McmcTree():
         # plt.show()
         return
 
-    def save_mats(self,):
+    def save_mats(self, prefix_dir=None):
         D = self.__get_D()
         A = self.__get_A()
         E = self.__get_E()
@@ -148,11 +148,11 @@ class McmcTree():
         gt_D = self.gt_D
         gt_E = self.gt_E
         gt_T = self.gt_T
-        np.savetxt('D_n{}_m{}_a{}_b{}.mat'.format(self.num_cells, self.num_genes, self.alpha, self.beta), D)
-        np.savetxt('A_n{}_m{}_a{}_b{}.mat'.format(self.num_cells, self.num_genes, self.alpha, self.beta), A)
-        np.savetxt('E_n{}_m{}_a{}_b{}.mat'.format(self.num_cells, self.num_genes, self.alpha, self.beta), E)
-        np.savetxt('gtD_n{}_m{}_a{}_b{}.mat'.format(self.num_cells, self.num_genes, self.alpha, self.beta), gt_D)
-        np.savetxt('gtE_n{}_m{}_a{}_b{}.mat'.format(self.num_cells, self.num_genes, self.alpha, self.beta), gt_E)
+        np.savetxt('{}D_n{}_m{}_a{}_b{}.mat'.format(prefix_dir, self.num_cells, self.num_genes, self.alpha, self.beta), D)
+        np.savetxt('{}A_n{}_m{}_a{}_b{}.mat'.format(prefix_dir, self.num_cells, self.num_genes, self.alpha, self.beta), A)
+        np.savetxt('{}E_n{}_m{}_a{}_b{}.mat'.format(prefix_dir, self.num_cells, self.num_genes, self.alpha, self.beta), E)
+        np.savetxt('{}gtD_n{}_m{}_a{}_b{}.mat'.format(prefix_dir, self.num_cells, self.num_genes, self.alpha, self.beta), gt_D)
+        np.savetxt('{}gtE_n{}_m{}_a{}_b{}.mat'.format(prefix_dir, self.num_cells, self.num_genes, self.alpha, self.beta), gt_E)
 
 
     def plot_all_results(self,):
