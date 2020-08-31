@@ -372,7 +372,7 @@ class McmcTree():
                 'mode:{}'.format(method),
                 'new_error:{:.2f}'.format(new_error),
                 'last_error:{:.2f}'.format(self.__errors[-1]),
-                'acc_prob:{:0.3f}'.format(acc_prob),
+                'acc_prob:{:0.3f}\n'.format(acc_prob),
                 ])
             )
 
