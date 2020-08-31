@@ -25,7 +25,7 @@ mpl.rc('font', **font)
 
 
 
-CELL_RANGE = np.linspace(5, 50, step=2, dtype=np.int)
+CELL_RANGE = np.linspace(5, 50, num=2, dtype=np.int)
 
 ### load random data
 M = 20
