@@ -30,12 +30,12 @@ mpl.rc('font', **font)
 
 ### load random data
 M = 20
-N = 30
+N = 40
 ZETA = 1
 Gamma = 0.15
-alpha = 0.1
-beta = 0.1
-MR = 0.00
+alpha = 0.01
+beta = 0.01
+MR = 0.005
 
 tg = TreeGenerator(
     M = M,
@@ -58,29 +58,29 @@ _.print_warn( 'There is {} cells and {} mutations at {} genes in this dataset.'.
 
 
 
-### fill missed data
-def tf(m,c):
-    os = len(np.where(D[:,c]==1.))*1.
-    zs = len(np.where(D[:,c]==0.))*1.
-    return 1. if np.random.rand() < os/(os+zs) else 0.
+# ### fill missed data
+# def tf(m,c):
+#     os = len(np.where(D[:,c]==1.))*1.
+#     zs = len(np.where(D[:,c]==0.))*1.
+#     return 1. if np.random.rand() < os/(os+zs) else 0.
 
-for m in range(G_num):
-    for c in range(C_num):
-        if D[m,c] == 3.:
-            D[m,c] = tf(m,c)
+# for m in range(G_num):
+#     for c in range(C_num):
+#         if D[m,c] == 3.:
+#             D[m,c] = tf(m,c)
 
 
 ### Run
 dl = list(d for d in D)
 root = [n for n,d in gt_T.in_degree() if d==0][0]
 print('ROOT:', root)
-T = Tree(gensNames, data_list=dl, root=str(root), alpha=alpha, beta=beta)
+T = Tree(gensNames, D, data_list=dl, root=str(root), alpha=alpha, beta=beta)
 T.set_ground_truth(gt_D, gt_E, gt_T=gt_T)
 
 T.randomize()
 # T.plot('T0')
 
-for i in range(3000):
+for i in range(1000):
     if T.next():
         break
 
