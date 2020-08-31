@@ -26,7 +26,7 @@ class McmcTree():
         mpl.rc('font', **font)
         
 
-    def __init__(self, nodes, data_list=None, alpha=0.001, beta=0.1, root='DNM3', name='My Tree'):
+    def __init__(self, nodes, D, data_list=None, alpha=0.001, beta=0.1, root='DNM3', name='My Tree', logfile=None):
         self.__T = nx.DiGraph()
         
         if data_list:
@@ -42,8 +42,9 @@ class McmcTree():
         self.root = root
         self.gene_names = nodes
         self.name = name
-        self.D = None
+        self.D = D
         self.step = 0
+        self.logfile = logfile
 
         self.last_A_hash = None
         self.last_A = None
@@ -108,8 +109,18 @@ class McmcTree():
         self.__plot_matrix(D, title, filename=filename, labels=labels, cmap=cmap)
 
     def __plot_DmE(self, DmE, title, filename=None):
+        labels = {0:'true', 1:r'false positive (\alpha)', -1:r'false negetive (\beta)', 2:'accepted (1)', 3:'accepted (0)'}
+        cmap = {0:[1,1,0.95,1], 1:[0.5,0.5,0.8,1], -1:[0.8,0.5,0.5,1], 2:[0.5,0.5,1,0.25], 3:[1,0.5,0.5,0.25]}
+        self.__plot_matrix(DmE, title, filename=filename, labels=labels, cmap=cmap)
+    
+    def __plot_EmGtE(self, DmE, title, filename=None):
         labels = {0:'true', 1:r'false positive (\alpha)', -1:r'false negetive (\beta)'}
         self.__plot_matrix(DmE, title, filename=filename, labels=labels)
+
+    def __plot_DmGtE(self, DmE, title, filename=None):
+        labels = {0:'true', 1:r'false positive (\alpha)', -1:r'false negetive (\beta)', 2:'accepted (1)', 3:'accepted (0)'}
+        cmap = {0:[1,1,0.95,1], 1:[0.5,0.5,0.8,1], -1:[0.8,0.5,0.5,1], 2:[0.5,0.5,1,0.25], 3:[1,0.5,0.5,0.25]}
+        self.__plot_matrix(DmE, title, filename=filename, labels=labels, cmap=cmap)
 
     def __plot_A(self, A, title, filename=None):
         xlabel = 'Attached cells to every node(gene) in the Mutation Tree'
@@ -169,7 +180,7 @@ class McmcTree():
             self.__plot_D(gt_D, 'Ground Truth D (GT_D)')
 
             plt.subplot2grid((8, 3), (3, 2))
-            self.__plot_DmE(D - D, 'D - D')
+            self.__plot_DmE(D - gt_D, 'D - GT_D')
 
 
             plt.subplot2grid((8, 3), (4, 0))
@@ -179,14 +190,14 @@ class McmcTree():
             self.__plot_E(gt_E, 'Ground Truth E (GT_E)')
 
             plt.subplot2grid((8, 3), (4, 2))
-            self.__plot_DmE(E - gt_E, 'E - GT_E')
+            self.__plot_EmGtE(E - gt_E, 'E - GT_E')
 
 
             plt.subplot2grid((8, 3), (5, 0))
             self.__plot_DmE(D-E, 'D - E')
 
             plt.subplot2grid((8, 3), (5, 1))
-            self.__plot_DmE(D-gt_E, 'GT_D - GT_E')
+            self.__plot_EmGtE(gt_D-gt_E, 'GT_D - GT_E')
 
             plt.subplot2grid((8, 3), (5, 2))
             self.__plot_DmE(D - gt_E, 'D - GT_E')
@@ -354,6 +365,16 @@ class McmcTree():
                 'acc_prob:{:0.3f}'.format(acc_prob),
             ])
         )
+        if self.logfile:
+            self.logfile.writeline(
+                ',\t'.join([
+                'step:{:3d}'.format(self.step),
+                'mode:{}'.format(method),
+                'new_error:{:.2f}'.format(new_error),
+                'last_error:{:.2f}'.format(self.__errors[-1]),
+                'acc_prob:{:0.3f}'.format(acc_prob),
+                ])
+            )
 
 
        
@@ -464,14 +485,15 @@ class McmcTree():
 
 
     def __get_D(self):
-        if self.D:
-            return D
-        else:
-            genes = self.__best_T.nodes(data=True)
-            D = np.zeros([self.num_genes, self.num_cells], dtype=np.int)
-            for i, g in enumerate(genes):
-                D[i, :] = np.array(g[1]['data'])
-            return D
+        return self.D
+        # if self.D:
+        #     return D
+        # else:
+        #     genes = self.__best_T.nodes(data=True)
+        #     D = np.zeros([self.num_genes, self.num_cells], dtype=np.int)
+        #     for i, g in enumerate(genes):
+        #         D[i, :] = np.array(g[1]['data'])
+        #     return D
 
     def __get_A(self, T=None):
         if not T:
@@ -496,6 +518,7 @@ class McmcTree():
         prob = 0
         a, b = self.alpha, self.beta
         for f,t in zip(from_sample, to_sample):
+            if int(t) == 3: continue # missed data
             p = f*t*(1-b) + (1-f)*(1-t)*(1-a) + f*(1-t)*b + (1-f)*t*a
             prob += np.log(p)
         return prob
@@ -530,7 +553,9 @@ class McmcTree():
         E = self.__get_E(T=T)
 
         DmE = D-E
+        DmE[np.where(np.abs(DmE) > 1)] = 0
         D_and_E = D*E
+        D_and_E[np.where(np.abs(D_and_E) > 1)] = 1
 
         ze_cnt = np.ones(self.num_cells)*self.num_genes - np.count_nonzero(DmE, 0)
         tp_cnt = np.count_nonzero(D_and_E-1, 0)
@@ -541,7 +566,7 @@ class McmcTree():
         prob = ( (1-self.beta)*tp_cnt + (1-self.alpha)*tn_cnt
                    +self.beta *fn_cnt +    self.alpha *fp_cnt )
 
-        error = np.sum(self.beta*fn_cnt + self.alpha*fp_cnt)
+        error = np.sum(self.beta*fn_cnt + self.alpha*fp_cnt)*10
         # error = np.abs(np.linalg.norm(E) - np.linalg.norm(D))
         # error = np.sum(np.abs( (DmE**1)[:] ) )
 
