@@ -366,7 +366,7 @@ class McmcTree():
             ])
         )
         if self.logfile:
-            self.logfile.writeline(
+            self.logfile.write(
                 ',\t'.join([
                 'step:{:3d}'.format(self.step),
                 'mode:{}'.format(method),
