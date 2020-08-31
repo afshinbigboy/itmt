@@ -101,6 +101,8 @@ class TreeGenerator():
         t = dict((i, j) for i,j in zip(T.nodes(), t))
         T = nx.relabel_nodes(T, t)
         raw_T = T.copy()
+        root = [n for n,d in raw_T.in_degree() if d==0][0]
+        
 
 
         if self.save_images:
@@ -110,7 +112,9 @@ class TreeGenerator():
         A = int(np.floor(self.Gamma*self.M))
         if A:
             for i in range(A):
-                p, c = random.sample(T.edges(),1)[0]
+                while True:
+                    p, c = random.sample(T.edges(),1)[0]
+                    if p != root: break
                 for child in T.successors(c):
                     T.add_edge(p,child)        
                 T.remove_node(c)
@@ -158,10 +162,15 @@ class TreeGenerator():
         ## ~~~~~~~~~~~~~~~~~~~~~ Tree to E ~~~~~~~~~~~~~~~~~~~~~~~~
         ## ========================================================
         E = np.zeros([self.M, self.N])
-        root = [n for n,d in raw_T.in_degree() if d==0][0]
         E[int(root), :] = 1
         for n in range(self.N):
-            path = list(nx.all_simple_paths(T, root, 'cell %d'%n))[0]
+            try:
+                path = list(nx.all_simple_paths(T, root, 'cell %d'%n))[0]
+            except:
+                print('root:', root)
+                pdot = nx.drawing.nx_pydot.to_pydot(T)
+                pdot.write_png('problem_tree.png')
+                exit()
             for g in path[:-1]:
                 try:
                     E[int(g),n] = 1
