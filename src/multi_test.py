@@ -28,8 +28,8 @@ mpl.rc('font', **font)
 CELL_RANGE = np.linspace(5, 30, num=3, dtype=np.int)
 
 ### load random data
-M = 20
-N = 40
+# M = 20
+# N = 40
 ZETA = 1
 Gamma = 0.15
 alpha = 0.01
