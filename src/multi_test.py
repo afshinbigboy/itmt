@@ -25,7 +25,7 @@ mpl.rc('font', **font)
 
 
 
-CELL_RANGE = np.linspace(5, 50, num=2, dtype=np.int)
+CELL_RANGE = np.linspace(5, 30, num=3, dtype=np.int)
 
 ### load random data
 M = 20
@@ -38,7 +38,7 @@ MR = 0.005
 
 prefix_dir = '../outputs/logs/'
 for N in CELL_RANGE:
-    for M in np.linspace(N, 3*N, min(10, 2*N-1), dtype=np.int):
+    for M in np.linspace(N, 2*N, min(10, N-1), dtype=np.int):
 
         step_num = 10
         _.print_info( 'There is {} cells and {} mutations.'.format(N, M) )
