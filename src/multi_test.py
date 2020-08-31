@@ -25,7 +25,7 @@ mpl.rc('font', **font)
 
 
 
-CELL_RANGE = range(3, 5)
+CELL_RANGE = range(5, 8)
 
 ### load random data
 M = 20
@@ -36,7 +36,7 @@ alpha = 0.01
 beta = 0.01
 MR = 0.005
 
-
+prefix_dir = '../outputs/logs/'
 for N in CELL_RANGE:
     for M in np.linspace(N, 3*N, min(10, 2*N-1), dtype=np.int):
 
@@ -46,7 +46,7 @@ for N in CELL_RANGE:
         while True:    
             # try:
                 # with open('n{}_m{}_z{}_g{}_a{}_b{}_mr{}.txt'.format(N, M, ZETA, Gamma, alpha, beta, MR), 'w') as file:
-                logfile = open('n{}_m{}_z{}_g{}_a{}_b{}_mr{}.txt'.format(N, M, ZETA, Gamma, alpha, beta, MR), 'w')
+                logfile = open('{}n{}_m{}_z{}_g{}_a{}_b{}_mr{}.txt'.format(prefix_dir, N, M, ZETA, Gamma, alpha, beta, MR), 'w')
                 logfile.write( 'There is {} cells and {} mutations.\n'.format(N, M) )
                 tg = TreeGenerator(
                     M = M,
@@ -75,12 +75,10 @@ for N in CELL_RANGE:
 
                 for i in range(step_num):
                     if T.next():
-                        print('ok')
                         break
                 # T.plot_all_results()
-                T.save_mats()
+                T.save_mats(prefix_dir)
                 logfile.close()
-                print('ok 2')
                 break
 
             # except:
