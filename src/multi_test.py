@@ -38,7 +38,7 @@ MR = 0.005
 
 prefix_dir = '../outputs/logs/'
 for N in CELL_RANGE:
-    for M in np.linspace(N, 2*N, min(10, N-1), dtype=np.int):
+    for M in np.linspace(N, N+N//2, min(10, N-1), dtype=np.int):
 
         step_num = 10
         _.print_info( 'There is {} cells and {} mutations.'.format(N, M) )
