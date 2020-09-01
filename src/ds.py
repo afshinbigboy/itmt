@@ -612,10 +612,6 @@ class McmcTree():
             
 
 
-
-
-
-
 #         pos = graphviz_layout(T, prog='twopi', args='-Nfontsize=10 -Nwidth=".2" -Nheight=".2" -Nmargin=0 -Gfontsize=8')
 #         plt.figure(figsize=(20,20))
 #         nx.draw_networkx_nodes(T, pos, T.nodes, node_size=9000, alpha=0.5, 

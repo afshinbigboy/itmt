@@ -9,7 +9,8 @@ import pygraphviz
 from networkx.drawing.nx_agraph import write_dot, graphviz_layout
 import random
 import pydoc
-
+import sys
+sys.path.append("..")
 from ds import McmcTree as Tree
 
 from utils import ColorPrint as _
@@ -24,8 +25,8 @@ mpl.rc('font', **font)
 
 
 ### load Navin's data
-D = np.loadtxt('../../dataset/real/dataNavin.csv', delimiter=' ')
-gensNames = np.loadtxt('../../dataset/real/dataNavin.geneNames', dtype=np.str)
+D = np.loadtxt('../datasets/real/dataNavin.csv', delimiter=' ')
+gensNames = np.loadtxt('../datasets/real/dataNavin.geneNames', dtype=np.str)
 
 D.shape
 C_num = D.shape[1]
@@ -61,32 +62,29 @@ edges = [
 ]
 
 dl = list(d for d in D)
-SNT = Tree(gensNames, data_list=dl, name='Paper Tree')
+SNT = Tree(gensNames, D=D, data_list=dl, name='Paper Tree')
 SNT.set_edges(edges, remove_edges=True)
 
 _.print_bold( 'SCITE Navis\'s Tree Error:', SNT.get_best_error() )
-# SNT.plot('SCITE')
+SNT.plot_best_T('paper_tree')
+
 
 
 
 
 ### Run
 dl = list(d for d in D)
-T = Tree(gensNames, data_list=dl)
+T = Tree(gensNames, D=D, data_list=dl)
+# edges = [('PIK3CA', 'c1orf223'),('PIK3CA', 'TCP11'),('DNM3', 'ITGAD'),('TRIM58', 'DUSP12'),('DCAF8L1', 'FCHSD2'),('DCAF8L1', 'GLCE'),('FBN2', 'PPP2RE'),('FCHSD2', 'LSG1'),('CASP3', 'PITRM1'),('CASP3', 'RABGAP1L'),('ITGAD', 'DCAF8L1'),('PPP2RE', 'ROPN1B'),('LSG1', 'PIK3CA'),('ROPN1B', 'MARCH11'),('BTLA', 'FBN2'),('DUSP12', 'BTLA'),('MARCH11', 'CASP3'),('MARCH11', 'CALD1'),('TCP11', 'TRIM58'),('TCP11', 'CNDP1'),('PITRM1', 'PRDM9'),('PITRM1', 'ZEHX4'),('PITRM1', 'MUTHY'),('PITRM1', 'CXXX1'),('PRDM9', 'CABP2'),('PRDM9', 'PAMK3'),('MUTHY', 'FGFR2'),('GPR64', 'TRIB2'),('SEC11A', 'C15orf23'),('SEC11A', 'PLXNA2'),('C15orf23', 'H1ENT'),('DKEZ', 'FUBP3'),('FUBP3', 'WDR16'),('WDR16', 'GPR64'),('RABGAP1L', 'TECTA'),('RABGAP1L', 'ZNE318'),('RABGAP1L', 'KIAA1539'),('RABGAP1L', 'SEC11A'),('GLCE', 'DKEZ')]
+# T.set_edges(edges, remove_edges=True)
 T.randomize()
-edges = [('PIK3CA', 'c1orf223'),('PIK3CA', 'TCP11'),('DNM3', 'ITGAD'),('TRIM58', 'DUSP12'),('DCAF8L1', 'FCHSD2'),('DCAF8L1', 'GLCE'),('FBN2', 'PPP2RE'),('FCHSD2', 'LSG1'),('CASP3', 'PITRM1'),('CASP3', 'RABGAP1L'),('ITGAD', 'DCAF8L1'),('PPP2RE', 'ROPN1B'),('LSG1', 'PIK3CA'),('ROPN1B', 'MARCH11'),('BTLA', 'FBN2'),('DUSP12', 'BTLA'),('MARCH11', 'CASP3'),('MARCH11', 'CALD1'),('TCP11', 'TRIM58'),('TCP11', 'CNDP1'),('PITRM1', 'PRDM9'),('PITRM1', 'ZEHX4'),('PITRM1', 'MUTHY'),('PITRM1', 'CXXX1'),('PRDM9', 'CABP2'),('PRDM9', 'PAMK3'),('MUTHY', 'FGFR2'),('GPR64', 'TRIB2'),('SEC11A', 'C15orf23'),('SEC11A', 'PLXNA2'),('C15orf23', 'H1ENT'),('DKEZ', 'FUBP3'),('FUBP3', 'WDR16'),('WDR16', 'GPR64'),('RABGAP1L', 'TECTA'),('RABGAP1L', 'ZNE318'),('RABGAP1L', 'KIAA1539'),('RABGAP1L', 'SEC11A'),('GLCE', 'DKEZ')]
-T.set_edges(edges, remove_edges=True)
-# T.plot('T0')
-
+T.plot_best_T('sn_initial_tree')
 
 # T.set_edges(edges, remove_edges=True)
-for i in range(1):
+for i in range(10):
     T.next()
-# T.plot_run('energy_chart')
-T.plot_best_T('best_tree')
-SNT.plot_best_T('paper_tree')
 
-
+T.plot_best_T('sn_best_tree')
 T.plot_all_results()
 # T.calc_tree_likelihood()
 # SNT.calc_tree_likelihood()

@@ -78,6 +78,7 @@ T = Tree(gensNames, D, data_list=dl, root=str(root), alpha=alpha, beta=beta)
 T.set_ground_truth(gt_D, gt_E, gt_T=gt_T)
 
 T.randomize()
+T.plot_best_T('initial T')
 # T.plot('T0')
 
 for i in range(1000):
