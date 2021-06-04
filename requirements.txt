@@ -5,6 +5,6 @@ scipy
 matplotlib
 networkx
 
-pygraphviz
+graphviz
 pydot
 pyyaml
