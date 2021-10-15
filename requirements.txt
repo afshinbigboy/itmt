@@ -8,3 +8,7 @@ networkx
 graphviz
 pydot
 pyyaml
+
+
+imageio
+notebook

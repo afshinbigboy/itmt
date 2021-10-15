@@ -61,6 +61,10 @@ class McmcTree():
         self.__errors = []
         
         self.run_data = []
+
+        self.SSNODES = set(['DNM3','ITGAD','ITGAD','BTLA','BTLA','PAMK3','PAMK3', 'FCHSD2','FCHSD2','LSG1', 
+                            'LSG1','DCAF8L1','DCAF8L1','PIK3CA','PIK3CA','CASP3','CASP3','TRIM58','TRIM58','TCP11',
+                            ])
     
 #         _.print_info('\nNew mcmc tree named:', name)
 
@@ -185,9 +189,9 @@ class McmcTree():
 
     def plot_all_results(self, plot_pm=False, p=5):
         D = self.__get_D()
-        A = self.__get_A()
-        E = self.__get_E()
         best_T = self.get_best_tree()
+        A = self.__get_A(T=best_T)
+        E = self.__get_E(T=best_T)
         gt_D = self.gt_D
         gt_E = self.gt_E
         gt_T = self.gt_T
@@ -203,7 +207,7 @@ class McmcTree():
             img = mpimg.imread('example.png')
             # plt.figure(figsize=(30,40))
             plt.imshow(img)
-            plt.title('best tree with error:{:0.3f}'.format(self.get_best_error()/10))
+            plt.title('best tree with error:{:0.3f}'.format(self.get_best_error()))
             plt.axis('off')
 
             plt.subplot2grid((8, 2), (0, 1), rowspan=3)
@@ -290,6 +294,10 @@ class McmcTree():
             n1 = random.choice(list(T.nodes))
             n2 = random.choice(list(T.nodes))
 
+            if n1 in self.SSNODES or n2 in self.SSNODES:
+                if n1 in self.SSNODES and n2 in self.SSNODES:
+                    continue
+
             if not n1 == n2:
                 if n1 != self.root and n2 != self.root:
                     break
@@ -330,6 +338,8 @@ class McmcTree():
         while True:
             T = self.__T.copy()
             n1 = random.choice(list(T.nodes))
+            if n1 in self.SSNODES:
+                continue
             if not n1 == self.root:
                 p1 = self.parent(n1)
                 if not p1 == self.root:
@@ -363,13 +373,19 @@ class McmcTree():
         n1, p , n2 = '', '', ''
         while True:
             n1 = random.choice(list(T.nodes))
+            if n1 in self.SSNODES:
+                continue
             if not n1 == self.root:
                 p = self.parent(n1)
                 break    
         T.remove_edge(p, n1)
         WCC = list(list(wc) for wc in nx.algorithms.components.weakly_connected_components(T))
         PTN = WCC[0] if p in WCC[0] else WCC[-1]
-        n2 = random.choice(PTN)
+        while True:
+            n2 = random.choice(PTN)
+            if n1 in self.SSNODES:
+                continue
+            break
         T.add_edge(n2, n1)
         
         # print(n1, n2, )
@@ -384,9 +400,9 @@ class McmcTree():
             acc_prob = 1
 
         if method == 'swap_nodes':
-            if acc_prob<1: acc_prob = acc_prob**10
+            if acc_prob<1: acc_prob = acc_prob/100
         else:
-            if acc_prob<1: acc_prob = acc_prob**self.__rho
+            if acc_prob<1: acc_prob = acc_prob/100
 
         self.__random_errors.append(new_error)
         
@@ -406,7 +422,7 @@ class McmcTree():
             [self.step, new_error, acc_prob]
         )
         
-        if self.step % 10000 == 0:
+        if self.step % 25 == 0:
             print(
                 ',\t'.join([
                     'step:{:3d}'.format(self.step),
@@ -483,6 +499,18 @@ class McmcTree():
         # plt.show()
         return
     
+
+    def plot_best_T_just(self, filename='pure_best_T.png'):
+        pdot = nx.drawing.nx_pydot.to_pydot(best_T)
+        pdot.write_png(filename)
+        img = mpimg.imread(filename)
+        # plt.figure(figsize=(30,40))
+        plt.imshow(img)
+        plt.title('best tree with error:{:0.3f}'.format(self.get_best_error()))
+        plt.axis('off')
+        plt.savefig(filename)
+
+
     def plot_best_T(self, filename=None):
         T = self.__best_T
         
@@ -525,14 +553,12 @@ class McmcTree():
                 # node.set_fillcolor('#db8625')
                 node.set_color('red')
 
-
         pdot.write_png('example.png')
         img = mpimg.imread('example.png')
         plt.figure(figsize=(20,20))
         plt.imshow(img)
-        plt.title('best tree with error:{:0.3f}'.format(self.get_best_error()/10))
+        plt.title('Navin best tree with error:{:0.3f}'.format(self.__calc_tree_error(T=T)))
         plt.axis('off')
-
 
         if filename:
             plt.savefig(filename)
@@ -583,7 +609,6 @@ class McmcTree():
             prob += np.log(p)
         return prob
     
-
     def __get_E(self, T=None):
 
         if not T:
@@ -633,18 +658,23 @@ class McmcTree():
 #         fp_cnt = np.count_nonzero(DmE-1, 0) - ze_cnt
 #         fn_cnt = np.count_nonzero(DmE+1, 0) - ze_cnt
         ep = 0
-        prob =  np.log((1-self.beta )**tp_cnt + ep) +\
-                np.log((1-self.alpha)**tn_cnt + ep) +\
-                np.log(self.beta **fn_cnt + ep) +\
-                np.log(self.alpha**fp_cnt + ep)
+        prob =  np.log((1-self.beta )**(tp_cnt+1)/1 + ep) +\
+                np.log((1-self.alpha)**(tn_cnt+1)/1 + ep) +\
+                np.log(self.beta **(fn_cnt+1)/1 + ep) +\
+                np.log(self.alpha**(fp_cnt+1)/1 + ep)
 
 #         error = np.sum(self.beta*fn_cnt + self.alpha*fp_cnt)*10
         # error = np.abs(np.linalg.norm(E) - np.linalg.norm(D))
         # error = np.sum(np.abs( (DmE**1)[:] ) )
 
         # _.print_info('Error:', error)
-        error = -1*prob
-        return error**1.5
+        error = -1*prob/400
+        return error**1.3
+    
+    
+    def calc_curr_t_error(self, T=None):
+        self.__plot_charts()
+        return self.__calc_tree_error(T)
     
 
 

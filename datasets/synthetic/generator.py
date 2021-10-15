@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import matplotlib as mpl
 import random
 import matplotlib.image as mpimg
-import pygraphviz
+import graphviz
 from networkx.drawing.nx_agraph import write_dot, graphviz_layout
 import matplotlib.patches as mpatches
 
